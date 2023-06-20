@@ -1,32 +1,28 @@
-import pygame
-from sys import exit
-
-WINDOW_WIDTH = 480
-WINDOW_HEIGHT = 880
+from settings import *
+import math
+from tetromino import Tetromino
 
 
-def main():
-    global screen, clock
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Tetris-clone")
-    clock = pygame.time.Clock()
+class Tetris:
+    def __init__(self, app):
+        self.app = app
+        self.sprite_group = pygame.sprite.Group()
+        self.tetromino = Tetromino(self)
 
-    while True:
-        draw_grid()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        pygame.display.update()
+    def draw_grid(self):
+        for x in range(FIELD_W):
+            for y in range(FIELD_H):
+                pygame.draw.rect(
+                    self.app.screen,
+                    "black",
+                    (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE),
+                    1,
+                )
 
+    def update(self):
+        self.tetromino.update()
+        self.sprite_group.update()
 
-def draw_grid():
-    block_size = 40
-    for x in range(0, WINDOW_WIDTH, block_size):
-        for y in range(0, WINDOW_HEIGHT, block_size):
-            rect = pygame.Rect(x, y, block_size, block_size)
-            pygame.draw.rect(screen, "White", rect, 1)
-
-
-main()
+    def draw(self):
+        self.draw_grid()
+        self.sprite_group.draw(self.app.screen)
