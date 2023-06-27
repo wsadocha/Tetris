@@ -1,6 +1,7 @@
 from settings import *
 import sys
 from tetris import Tetris
+import pathlib
 
 
 class App:
@@ -10,12 +11,28 @@ class App:
         self.screen = pygame.display.set_mode(RESOLUTION)
         self.clock = pygame.time.Clock()
         self.set_timer()
+        self.images = self.load_images()
         self.tetris = Tetris(self)
+
+    def load_images(self):
+        files = [
+            item
+            for item in pathlib.Path(SPRITE_DIR_PATH).rglob("*.png")
+            if item.is_file()
+        ]
+        images = [pygame.image.load(file).convert_alpha() for file in files]
+        images = [
+            pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE)) for image in images
+        ]
+        return images
 
     def set_timer(self):
         self.user_event = pygame.USEREVENT + 0
+        self.fast_user_event = pygame.USEREVENT + 1
         self.anim_trigger = False
+        self.fast_anim_trigger = False
         pygame.time.set_timer(self.user_event, ANIM_TIME_INTERVAL)
+        pygame.time.set_timer(self.fast_user_event, FAST_ANIM_TIME_INTERVAL)
 
     def update(self):
         self.tetris.update()
@@ -28,6 +45,7 @@ class App:
 
     def check_events(self):
         self.anim_trigger = False
+        self.fast_anim_trigger = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -36,6 +54,8 @@ class App:
                 self.tetris.control(pressed_key=event.key)
             elif event.type == self.user_event:
                 self.anim_trigger = True
+            elif event.type == self.fast_user_event:
+                self.fast_anim_trigger = True
 
     def run(self):
         while True:
